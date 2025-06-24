@@ -1,0 +1,429 @@
+generator client {
+  provider = "prisma-client-js"
+
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model bancos_sat {
+  codigo          String @id @db.Char(3)
+  nombre_corto    String @db.VarChar(50)
+  nombre_completo String @db.VarChar(200)
+}
+
+model categorias {
+  id                           Int                            @id @default(autoincrement())
+  categoria                    Int                            @unique
+  descripcion                  String                         @db.VarChar(150)
+  empleado_informacion_laboral empleado_informacion_laboral[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model conceptos_nomina {
+  id                     Int                      @id @default(autoincrement())
+  clave                  Int                      @unique
+  descripcion            String                   @db.VarChar(100)
+  grabada                Boolean?                 @default(true)
+  smg_exento_cantidad    Decimal?                 @default(0) @db.Decimal(10, 2)
+  porcentaje_exencion    Decimal?                 @default(0) @db.Decimal(5, 2)
+  fijo_variable          String?                  @db.Char(1)
+  se_paga                String?                  @db.Char(1)
+  incidencias_nomina     incidencias_nomina[]
+  prenominas_incidencias prenominas_incidencias[]
+}
+
+model departamentos {
+  id            Int        @id @default(autoincrement())
+  departamento  Int        @unique
+  descripcion   String     @db.VarChar(150)
+  jefe_empleado Int?
+  tipo          Int?       @default(1)
+  jefe_nombre   String?    @db.VarChar(150)
+  empleados     empleados? @relation(fields: [jefe_empleado, tipo], references: [empleado, tipo], onDelete: NoAction, onUpdate: NoAction, map: "fk_jefe")
+}
+
+model descuentos_activos {
+  id             Int        @id @default(autoincrement())
+  empleado_id    Int?
+  tipo           Int?       @default(1)
+  tipo_descuento String?    @db.VarChar(50)
+  monto          Decimal?   @db.Decimal(10, 2)
+  fecha_inicio   DateTime?  @db.Date
+  fecha_fin      DateTime?  @db.Date
+  clave          Int
+  saldo          Decimal    @default(0) @db.Decimal(10, 2)
+  numeropago     Int        @default(0)
+  totalpagos     Int        @default(0)
+  empleados      empleados? @relation(fields: [empleado_id, tipo], references: [empleado, tipo], onDelete: NoAction, onUpdate: NoAction, map: "fk_descuentos_activos_empleado")
+}
+
+model empleado_compensacion {
+  id           Int        @id @default(autoincrement())
+  empleado_id  Int
+  tipo         Int?       @default(1)
+  compensacion Decimal?   @db.Decimal(10, 2)
+  empleados    empleados? @relation(fields: [empleado_id, tipo], references: [empleado, tipo], onDelete: NoAction, onUpdate: NoAction, map: "fk_empleado_compensacion_empleado")
+}
+
+model empleado_cuenta_bancaria {
+  id          Int        @id @default(autoincrement())
+  empleado_id Int?
+  clabe       BigInt?
+  banco       Int?
+  regimss     Int?
+  calimss     Boolean?
+  calispt     Boolean?
+  tipo        Int?       @default(1)
+  empleados   empleados? @relation(fields: [empleado_id, tipo], references: [empleado, tipo], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model empleado_direccion {
+  id            Int        @id @default(autoincrement())
+  empleado_id   Int?
+  calle         String?    @db.VarChar(150)
+  num_ext       String?    @db.VarChar(20)
+  num_int       String?    @db.VarChar(20)
+  colonia       String?    @db.VarChar(100)
+  referencia    String?
+  ciudad        String?    @db.VarChar(100)
+  codigo_ciudad String?    @db.VarChar(10)
+  estado        String?    @db.VarChar(100)
+  codigo_estado String?    @db.VarChar(10)
+  codigo_postal String?    @db.VarChar(10)
+  tipo          Int?       @default(1)
+  empleados     empleados? @relation(fields: [empleado_id, tipo], references: [empleado, tipo], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model empleado_documentacion {
+  id                 Int        @id @default(autoincrement())
+  empleado_id        Int?
+  foto               String?
+  credencial_elector String?
+  licencia           String?
+  cartilla           String?
+  tipo               Int?       @default(1)
+  empleados          empleados? @relation(fields: [empleado_id, tipo], references: [empleado, tipo], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model empleado_formacion_academica {
+  id          Int        @id @default(autoincrement())
+  empleado_id Int?
+  escuela     String?
+  carrera     String?
+  grado       String?
+  termino     String?
+  duracion    String?
+  tipo        Int?       @default(1)
+  empleados   empleados? @relation(fields: [empleado_id, tipo], references: [empleado, tipo], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model empleado_informacion_laboral {
+  id                      Int         @id @default(autoincrement())
+  empleado_id             Int?
+  departamento            Int?
+  categoria               Int?
+  programa                Int?
+  subprograma             Int?
+  meta                    Int?
+  accion                  Int?
+  municipio               Int?
+  nivel                   Int?
+  puesto                  Int?
+  sueldo_actual           Decimal?    @db.Decimal(10, 2)
+  sueldo_anterior         Decimal?    @db.Decimal(10, 2)
+  sueldo_respaldo         Decimal?    @db.Decimal(10, 2)
+  estatus                 String?     @db.VarChar(50)
+  tipo_contrato           String?     @db.VarChar(50)
+  tipo_empleado           String?     @db.Char(1)
+  fecha_alta              DateTime?   @db.Date
+  fecha_base              DateTime?   @db.Date
+  fecha_ultimo_movimiento DateTime?   @db.Date
+  fecha_movimiento        DateTime?   @db.Date
+  fecha_baja              DateTime?   @db.Date
+  fecha_terminacion       DateTime?   @db.Date
+  fecha_contratacion      DateTime?   @db.Date
+  motivo_baja             String?
+  turno                   String?     @db.VarChar(10)
+  checa_sn                Boolean?
+  cheques_sn              Boolean?
+  clave_presupuestal      String?
+  timbrado_enviado        Boolean?
+  validez                 String?     @db.Char(1)
+  tipo                    Int?        @default(1)
+  empleados               empleados?  @relation(fields: [empleado_id, tipo], references: [empleado, tipo], onDelete: NoAction, onUpdate: NoAction)
+  categorias              categorias? @relation(fields: [categoria], references: [categoria], onDelete: NoAction, onUpdate: NoAction, map: "fk_categoria")
+}
+
+model empleado_telefono {
+  id          Int        @id @default(autoincrement())
+  empleado_id Int?
+  fijo        String?    @db.VarChar(20)
+  celular     String?    @db.VarChar(20)
+  tipo        Int?       @default(1)
+  empleados   empleados? @relation(fields: [empleado_id, tipo], references: [empleado, tipo], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model empleados {
+  id                           Int                            @id @default(autoincrement())
+  empleado                     Int
+  nombre                       String?                        @db.VarChar(100)
+  apellido_paterno             String?                        @db.VarChar(100)
+  apellido_materno             String?                        @db.VarChar(100)
+  curp                         String?                        @db.VarChar(18)
+  rfc                          String?                        @db.VarChar(13)
+  homoclave                    String?                        @db.VarChar(5)
+  sexo                         String?                        @db.Char(1)
+  estado_civil                 String?                        @db.Char(1)
+  edad                         Int?
+  fecha_nacimiento             DateTime?                      @db.Date
+  email                        String?                        @db.VarChar(150)
+  tipo                         Int?                           @default(1)
+  departamentos                departamentos[]
+  descuentos_activos           descuentos_activos[]
+  empleado_compensacion        empleado_compensacion[]
+  empleado_cuenta_bancaria     empleado_cuenta_bancaria[]
+  empleado_direccion           empleado_direccion[]
+  empleado_documentacion       empleado_documentacion[]
+  empleado_formacion_academica empleado_formacion_academica[]
+  empleado_informacion_laboral empleado_informacion_laboral[]
+  empleado_telefono            empleado_telefono[]
+  incidencias_nomina           incidencias_nomina[]
+  nominas_empleados            nominas_empleados[]
+  prenominas_empleados         prenominas_empleados[]
+  prestaciones_empleados       prestaciones_empleados[]
+
+  @@unique([empleado, tipo], map: "empleados_empleado_tipo_unique")
+}
+
+model incidencias_nomina {
+  id               Int              @id @default(autoincrement())
+  empleado_id      Int
+  tipo             Int              @default(1)
+  tipo_empleado    String           @db.Char(1)
+  tipo_nomina      String           @db.Char(1)
+  periodo          Int
+  clave            Int
+  importe          Decimal          @db.Decimal(10, 2)
+  tipo_movimiento  String           @db.VarChar(1)
+  conceptos_nomina conceptos_nomina @relation(fields: [clave], references: [clave], onDelete: NoAction, onUpdate: NoAction, map: "fk_incidencia_concepto")
+  empleados        empleados        @relation(fields: [empleado_id, tipo], references: [empleado, tipo], onDelete: NoAction, onUpdate: NoAction, map: "fk_incidencia_empleado")
+  tipos_empleado   tipos_empleado   @relation(fields: [tipo_empleado], references: [tipo], onDelete: NoAction, onUpdate: NoAction, map: "fk_incidencia_tipoempleado")
+  tipos_nomina     tipos_nomina     @relation(fields: [tipo_nomina], references: [tiponomina], onDelete: NoAction, onUpdate: NoAction, map: "fk_indicencia_tiponomina")
+}
+
+model niveles_empleados {
+  id                Int            @id @default(autoincrement())
+  tipo_empleado     String         @db.VarChar(1)
+  nivel             Int
+  sueldo_mensual    Decimal?       @db.Decimal(10, 2)
+  canasta_basica    Decimal?       @db.Decimal(10, 2)
+  bono_transporte   Decimal?       @db.Decimal(10, 2)
+  prevision_social  Decimal?       @db.Decimal(10, 2)
+  fomento_educativo Decimal?       @db.Decimal(10, 2)
+  tipos_empleado    tipos_empleado @relation(fields: [tipo_empleado], references: [tipo], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model nominas {
+  id                     Int                 @id @default(autoincrement())
+  periodo                Int
+  a_o                    Int                 @map("año")
+  tipo_nomina            String              @db.Char(1)
+  estatus                String?             @db.VarChar(20)
+  editable               Boolean?            @default(true)
+  fecha_cierre           DateTime?           @db.Timestamp(6)
+  autorizado_por_usuario String?             @db.VarChar(50)
+  autorizado_por_fecha   DateTime?           @db.Timestamp(6)
+  uuid                   String?             @db.VarChar(100)
+  folio_fiscal           String?             @db.VarChar(100)
+  sello_digital          String?
+  fecha_timbrado         DateTime?           @db.Timestamp(6)
+  tipos_nomina           tipos_nomina        @relation(fields: [tipo_nomina], references: [tiponomina], onDelete: NoAction, onUpdate: NoAction)
+  nominas_empleados      nominas_empleados[]
+}
+
+model nominas_empleados {
+  id                            Int                             @id @default(autoincrement())
+  nomina_id                     Int?
+  empleado_id                   Int
+  tipo                          Int                             @default(1)
+  nombre                        String?                         @db.VarChar(150)
+  rfc                           String?                         @db.VarChar(13)
+  departamento                  Int?
+  categoria                     Int?
+  clabe                         String?                         @db.VarChar(20)
+  total_percepciones            Decimal?                        @db.Decimal(10, 2)
+  total_deducciones             Decimal?                        @db.Decimal(10, 2)
+  neto                          Decimal?                        @db.Decimal(10, 2)
+  empleados                     empleados                       @relation(fields: [empleado_id, tipo], references: [empleado, tipo], onDelete: NoAction, onUpdate: NoAction, map: "fk_nomina_empleado")
+  nominas                       nominas?                        @relation(fields: [nomina_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  nominas_empleados_incidencias nominas_empleados_incidencias[]
+}
+
+model nominas_empleados_incidencias {
+  id                 Int                @id @default(autoincrement())
+  nomina_empleado_id Int?
+  clave              Int?
+  descripcion        String?            @db.VarChar(100)
+  tipo_movimiento    String?            @db.VarChar(20)
+  importe            Decimal?           @db.Decimal(10, 2)
+  nominas_empleados  nominas_empleados? @relation(fields: [nomina_empleado_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model parametros_nomina {
+  id                                Int       @id @default(autoincrement())
+  smg                               Decimal?  @db.Decimal(10, 2)
+  porcentaje_imss                   Decimal?  @db.Decimal(5, 2)
+  porcentaje_subsidio               Decimal?  @db.Decimal(5, 2)
+  porcentaje_prima_vacacional       Decimal?  @db.Decimal(5, 2)
+  porcentaje_prima_dominical        Decimal?  @db.Decimal(5, 2)
+  total_contrato_isss               Decimal?  @db.Decimal(10, 2)
+  isss_contrato                     Decimal?  @db.Decimal(10, 2)
+  porcentaje_base_isss              Decimal?  @db.Decimal(5, 2)
+  porcentaje_base_isss_patron       Decimal?  @db.Decimal(5, 2)
+  porcentaje_fondo_pension          Decimal?  @db.Decimal(5, 2)
+  porcentaje_convenio_adicional     Decimal?  @db.Decimal(5, 2)
+  porcentaje_cuota_sindical         Decimal?  @db.Decimal(5, 2)
+  dias_aguinaldo                    Int?
+  dias_aguinaldo_confianza          Int?
+  porcentaje_fondo_pension_patronal Decimal?  @db.Decimal(5, 2)
+  porcentaje_reserva_tece           Decimal?  @db.Decimal(5, 2)
+  porcentaje_reserva_tecp           Decimal?  @db.Decimal(5, 2)
+  porcentaje_accidente_trabajo      Decimal?  @db.Decimal(5, 2)
+  porcentaje_confianza_isss         Decimal?  @db.Decimal(5, 2)
+  porcentaje_confianza_isss_p       Decimal?  @db.Decimal(5, 2)
+  buena_disponibilidad              Decimal?  @db.Decimal(10, 2)
+  estimulo                          Decimal?  @db.Decimal(10, 2)
+  dias_responsabilidad              Int?
+  fecha_responsabilidad             DateTime? @db.Date
+}
+
+model periodos_nomina {
+  id            Int       @id @default(autoincrement())
+  periodo       Int       @unique
+  cerrado       Boolean?  @default(false)
+  fecha_desde   DateTime? @db.Date
+  fecha_hasta   DateTime? @db.Date
+  fecha_proceso DateTime? @db.Date
+}
+
+model prenominas {
+  id                   Int                    @id @default(autoincrement())
+  periodo              Int
+  anio                 Int
+  tipo_nomina          String                 @db.Char(1)
+  estatus              String?                @db.VarChar(20)
+  editable             Boolean?               @default(true)
+  fecha_creacion       DateTime?              @db.Timestamp(6)
+  comentarios          String?
+  tipos_nomina         tipos_nomina           @relation(fields: [tipo_nomina], references: [tiponomina], onDelete: NoAction, onUpdate: NoAction)
+  prenominas_empleados prenominas_empleados[]
+}
+
+model prenominas_empleados {
+  id                     Int                      @id(map: "prenomina_empleados_pkey") @default(autoincrement())
+  prenomina_id           Int?
+  empleado_id            Int?
+  tipo                   Int?                     @default(1)
+  tipo_empleado          String?                  @db.Char(1)
+  total_percepciones     Decimal?                 @db.Decimal(10, 2)
+  total_deducciones      Decimal?                 @db.Decimal(10, 2)
+  neto                   Decimal?                 @db.Decimal(10, 2)
+  empleados              empleados?               @relation(fields: [empleado_id, tipo], references: [empleado, tipo], onDelete: NoAction, onUpdate: NoAction, map: "fk_prenomina_empleado")
+  tipos_empleado         tipos_empleado?          @relation(fields: [tipo_empleado], references: [tipo], onDelete: NoAction, onUpdate: NoAction, map: "fk_prenomina_tipo_empleado")
+  prenominas             prenominas?              @relation(fields: [prenomina_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "prenomina_empleados_prenomina_id_fkey")
+  prenominas_incidencias prenominas_incidencias[]
+}
+
+model prenominas_incidencias {
+  id                    Int                  @id @default(autoincrement())
+  prenomina_empleado_id Int
+  clave                 Int
+  descripcion           String?              @db.VarChar(100)
+  tipo_movimiento       String?              @db.VarChar(20)
+  importe               Decimal?             @db.Decimal(10, 2)
+  grabada               Boolean?
+  unidad_exencion       String?              @db.VarChar(20)
+  valor_unidad_exencion Decimal?             @db.Decimal(10, 2)
+  conceptos_nomina      conceptos_nomina     @relation(fields: [clave], references: [clave], onDelete: NoAction, onUpdate: NoAction)
+  prenominas_empleados  prenominas_empleados @relation(fields: [prenomina_empleado_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model prestaciones_empleados {
+  id                   Int             @id @default(autoincrement())
+  empleado_id          Int
+  tipo                 Int?            @default(1)
+  tipo_empleado        String?         @db.VarChar(1)
+  sueldo_mensual       Decimal?        @db.Decimal(10, 2)
+  sueldo_diario        Decimal?        @db.Decimal(10, 2)
+  canasta_basica       Decimal?        @db.Decimal(10, 2)
+  bono_transporte      Decimal?        @db.Decimal(10, 2)
+  prevision_social     Decimal?        @db.Decimal(10, 2)
+  fomento_educativo    Decimal?        @db.Decimal(10, 2)
+  quinquenio           Decimal?        @db.Decimal(10, 2)
+  aguinaldo_catorcenal Decimal?        @db.Decimal(10, 2)
+  sueldo_integrado     Decimal?        @db.Decimal(10, 2)
+  empleados            empleados?      @relation(fields: [empleado_id, tipo], references: [empleado, tipo], onDelete: NoAction, onUpdate: NoAction, map: "fk_prestaciones_empleado")
+  tipos_empleado       tipos_empleado? @relation(fields: [tipo_empleado], references: [tipo], onDelete: NoAction, onUpdate: NoAction, map: "fk_prestaciones_tipo_empleado")
+}
+
+model tabla_isr {
+  id                   Int     @id @default(autoincrement())
+  tipo                 String  @db.VarChar(20)
+  periodo_fiscal       Int
+  limite_inferior      Decimal @db.Decimal(12, 2)
+  limite_superior      Decimal @db.Decimal(12, 2)
+  cuota_fija           Decimal @db.Decimal(12, 2)
+  porcentaje_excedente Decimal @db.Decimal(5, 2)
+}
+
+model tipos_empleado {
+  id                     Int                      @id @default(autoincrement())
+  tipo                   String                   @unique @db.Char(1)
+  descripcion            String                   @db.VarChar(100)
+  incidencias_nomina     incidencias_nomina[]
+  niveles_empleados      niveles_empleados[]
+  prenominas_empleados   prenominas_empleados[]
+  prestaciones_empleados prestaciones_empleados[]
+}
+
+model tipos_nomina {
+  id                 Int                  @id @default(autoincrement())
+  tiponomina         String               @unique @db.Char(1)
+  descripcion        String               @db.VarChar(100)
+  incidencias_nomina incidencias_nomina[]
+  nominas            nominas[]
+  prenominas         prenominas[]
+}
+
+
+
+// Reemplaza tu modelo 'usuarios' con este 'User' mapeado
+
+model User {
+  id              Int      @id @default(autoincrement())
+  username        String   @unique @db.VarChar(50)
+  email           String   @unique @db.VarChar(100)
+  passwordHash    String   @map("password_hash") // Mapea password_hash a passwordHash
+  rol             String?  @default("usuario") @db.VarChar(20)
+  estatus         Boolean? @default(true)
+  tipo            Int?     @default(1)
+  creadoEn        DateTime? @default(now()) @map("creado_en") @db.Timestamp(6)
+  actualizadoEn   DateTime? @default(now()) @map("actualizado_en") @db.Timestamp(6)
+
+  // Relaciones (si las necesitas en el futuro)
+   usuarios_sesiones usuarios_sesiones[]
+
+  @@map("usuarios") // Le dice a Prisma que este modelo corresponde a la tabla "usuarios" en la BD
+}
+
+model usuarios_sesiones {
+  id         Int       @id @default(autoincrement())
+  usuario_id Int?
+  token      String?
+  creado_en  DateTime? @default(now()) @db.Timestamp(6)
+  expiracion DateTime? @db.Timestamp(6)
+  usuarios   User? @relation(fields: [usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
