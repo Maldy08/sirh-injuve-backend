@@ -3,24 +3,16 @@
     "target": "es2021",
     "module": "commonjs",
     "lib": ["es2021"],
-    "rootDir": "./src",
     "outDir": "./dist",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
+    "rootDir": "./src",
     "strict": true,
+    "esModuleInterop": true,
     "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
   },
-  // --- ¡ESTA PARTE ES LA CLAVE! ---
-  // Le decimos explícitamente a TypeScript qué carpetas y archivos debe analizar.
-
-
-"include": [
-  "src/**/*.ts",
-  "src/**/*.d.ts"  // <-- Añade esta línea
-],
-  "exclude": [
-    "node_modules"
+  "include": [
+    "src" // TypeScript es lo suficientemente inteligente para encontrar todo dentro de 'src'
   ]
 }

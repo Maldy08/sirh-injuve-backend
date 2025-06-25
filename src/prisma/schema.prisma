@@ -8,10 +8,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model bancos_sat {
-  codigo          String @id @db.Char(3)
-  nombre_corto    String @db.VarChar(50)
-  nombre_completo String @db.VarChar(200)
+model BancoSat {
+  codigo         String @id @db.Char(3)
+  nombreCorto    String @map("nombre_corto") @db.VarChar(50)
+  nombreCompleto String @map("nombre_completo") @db.VarChar(200)
+
+  @@map("bancos_sat")
 }
 
 model categorias {

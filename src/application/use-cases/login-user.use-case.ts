@@ -53,7 +53,7 @@ export class LoginUserUseCase {
 
     // ... (el resto del código sigue igual)
     const token = await this.jwtService.generateToken({
-      id: user.id.toString(),
+      id: user.id,
       email: user.email,
     });
 
